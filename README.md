@@ -1,9 +1,9 @@
 Milkcocoa Arduino SDK
 =====
 
-[Milkcocoa](https://mlkcca.com/) SDK for Arduino & ESP8266.
+[Milkcocoa](https://mlkcca.com/) SDK for Arduino with ESP8266(use AT).
 
-Works with the ESP8266 Arduino platforms, and anything that supports Arduino's Client interface.
+Works with Arduino M0 & M0 pro with ESP8266.
 
 
 ## How To Use
