@@ -91,7 +91,9 @@ MIT
 
 
 
-以下はCopyright (c) 2015 Technical Rockstars.
+Copyright (c) 2015 Technical Rockstars.
+Copyright (C) 2015 Embedded and Real-Time Systems Laboratory
+              Graduate School of Information Science, Nagoya Univ., JAPAN
 
 - Milkcocoa.h
 - Milkcocoa.cpp
