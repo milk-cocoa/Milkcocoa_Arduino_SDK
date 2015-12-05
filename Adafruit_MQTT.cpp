@@ -21,6 +21,12 @@
 // SOFTWARE.
 #include "include/Adafruit/Adafruit_MQTT.h"
 
+#if defined(ARDUINO_ARCH_AVR)
+#define strncasecmp strncasecmp_P
+#define strncpy strncpy_P
+#else
+#include "avr/dtostrf.h"
+#endif
 
 void printBuffer(uint8_t *buffer, uint8_t len) {
   for (uint8_t i=0; i<len; i++) {
@@ -63,7 +69,7 @@ static uint8_t *stringprint_P(uint8_t *p, const char *s, uint16_t maxlen=0) {
   */
   p[0] = len >> 8; p++;
   p[0] = len & 0xFF; p++;
-  strncpy_P((char *)p, s, len);
+  strncpy((char *)p, s, len);
   return p+len;
 }
 
@@ -231,7 +237,7 @@ Adafruit_MQTT_Subscribe *Adafruit_MQTT::readSubscription(int16_t timeout) {
         continue;
       // Stop if the subscription topic matches the received topic. Be careful
       // to make comparison case insensitive.
-      if (strncasecmp_P((char*)buffer+4, subscriptions[i]->topic, topiclen) == 0) {
+      if (strncasecmp((char*)buffer+4, subscriptions[i]->topic, topiclen) == 0) {
         DEBUG_PRINT(F("Found sub #")); DEBUG_PRINTLN(i);
         break;
       }

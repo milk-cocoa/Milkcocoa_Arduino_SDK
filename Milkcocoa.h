@@ -2,7 +2,8 @@
 The MIT License (MIT)
 
 Copyright (c) 2015 Technical Rockstars
-
+Copyright (C) 2015 Embedded and Real-Time Systems Laboratory
+              Graduate School of Information Science, Nagoya Univ., JAPAN
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -33,8 +34,8 @@ SOFTWARE.
 
 class DataElement {
   public:
-    DataElement();
-    DataElement(char *json_string);
+    void newData();
+    void newData(char *json_string);
     void setValue(const char *key, const char *v);
     void setValue(const char *key, int v);
     void setValue(const char *key, double v);
@@ -42,9 +43,11 @@ class DataElement {
     char *getString(const char *key);
     int getInt(const char *key);
     float getFloat(const char *key);
-
+    void freeData(void);
+    
   private:
     aJsonObject *params;
+    aJsonObject *paJsonObj;
 };
 
 typedef void (*GeneralFunction) (DataElement elem);
@@ -75,6 +78,7 @@ private:
   char session[128];
   Adafruit_MQTT_Client *mqtt;
   MilkcocoaSubscriber *milkcocoaSubscribers[MILKCOCOA_SUBSCRIBERS];
+  DataElement de;  
 };
 
 

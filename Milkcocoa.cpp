@@ -2,7 +2,8 @@
 The MIT License (MIT)
 
 Copyright (c) 2015 Technical Rockstars
-
+Copyright (C) 2015 Embedded and Real-Time Systems Laboratory
+              Graduate School of Information Science, Nagoya Univ., JAPAN
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -26,13 +27,21 @@ SOFTWARE.
 
 
 
-DataElement::DataElement() {
+void DataElement::newData() {
   params = aJson.createObject();
 }
 
-DataElement::DataElement(char *json_string) {
+void DataElement::newData(char *json_string) {
   aJsonObject* obj = aJson.parse(json_string);
+  paJsonObj = obj;  
   params = aJson.getObjectItem(obj, "params");
+}
+
+void DataElement::freeData() {
+  if (paJsonObj != NULL) {
+    aJson.deleteItem(paJsonObj);
+    paJsonObj = NULL;
+  }
 }
 
 void DataElement::setValue(const char *key, const char *v) {
@@ -68,7 +77,7 @@ float DataElement::getFloat(const char *key) {
 char *DataElement::toCharArray() {
   aJsonObject *data = aJson.createObject();
   aJson.addItemToObject(data, "params", params);
-  aJson.print(data);
+  return aJson.print(data);
 }
 
 Milkcocoa::Milkcocoa(Client *client, const char *host, uint16_t port, const char *_app_id, const char *client_id) {
@@ -122,14 +131,14 @@ bool Milkcocoa::push(const char *path, DataElement dataelement) {
   char topic[100];
   sprintf(topic, "%s/%s/push", app_id, path);
   Adafruit_MQTT_Publish pushPublisher = Adafruit_MQTT_Publish(mqtt, topic);
-  pushPublisher.publish(dataelement.toCharArray());
+  return pushPublisher.publish(dataelement.toCharArray());
 }
 
 bool Milkcocoa::send(const char *path, DataElement dataelement) {
   char topic[100];
   sprintf(topic, "%s/%s/send", app_id, path);
   Adafruit_MQTT_Publish pushPublisher = Adafruit_MQTT_Publish(mqtt, topic);
-  pushPublisher.publish(dataelement.toCharArray());
+  return pushPublisher.publish(dataelement.toCharArray());
 }
 
 void Milkcocoa::loop() {
@@ -139,8 +148,9 @@ void Milkcocoa::loop() {
     for (uint8_t i=0; i<MILKCOCOA_SUBSCRIBERS; i++) {
       if(milkcocoaSubscribers[i] == 0) continue;
       if (subscription == (milkcocoaSubscribers[i]->mqtt_sub) ) {
-        DataElement de = DataElement((char *)milkcocoaSubscribers[i]->mqtt_sub->lastread);
-        milkcocoaSubscribers[i]->cb( de );
+          de.newData((char *)milkcocoaSubscribers[i]->mqtt_sub->lastread);
+          milkcocoaSubscribers[i]->cb( de );
+          de.freeData();
       }
     }
   }
@@ -167,6 +177,7 @@ bool Milkcocoa::on(const char *path, const char *event, GeneralFunction cb) {
       return true;
     }
   }
+  return false;
 }
 
 MilkcocoaSubscriber::MilkcocoaSubscriber(GeneralFunction _cb) {

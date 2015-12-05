@@ -55,13 +55,13 @@ uint16_t Adafruit_MQTT_Client::readPacket(uint8_t *buffer, uint8_t maxlen,
   int16_t t = timeout;
 
   while (client->connected() && (timeout >= 0)) {
-    //DEBUG_PRINT('.');
+    DEBUG_PRINT('.');
     while (client->available()) {
-      //DEBUG_PRINT('!');
+      DEBUG_PRINT('!');
       char c = client->read();
       timeout = t;  // reset the timeout
       buffer[len] = c;
-      //DEBUG_PRINTLN((uint8_t)c, HEX);
+      DEBUG_PRINTLN((uint8_t)c, HEX);
       len++;
       if (len == maxlen) {  // we read all we want, bail
         DEBUG_PRINT(F("Read packet:\t"));

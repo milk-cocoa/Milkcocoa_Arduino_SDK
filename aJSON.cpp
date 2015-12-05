@@ -38,6 +38,8 @@
 #include <ctype.h>
 #ifdef __AVR__
 #include <avr/pgmspace.h>
+#elif defined(ARDUINO_ARCH_SAMD)
+#include <avr/pgmspace.h>
 #else
 #include <pgmspace.h>
 #endif
