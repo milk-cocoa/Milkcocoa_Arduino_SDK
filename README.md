@@ -63,7 +63,7 @@ MIT
 
 
 
-‰ª•‰∏ã„ÅØCopyright (c) 2015 Technical Rockstars.
+à»â∫ÇÕCopyright (c) 2015 Technical Rockstars.
 
 - Milkcocoa.h
 - Milkcocoa.cpp
