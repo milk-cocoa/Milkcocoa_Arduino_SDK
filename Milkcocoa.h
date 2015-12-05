@@ -34,8 +34,9 @@ SOFTWARE.
 
 class DataElement {
   public:
-    void newData();
-    void newData(char *json_string);
+    DataElement();
+    DataElement(char *json_string);
+    ~DataElement();
     void setValue(const char *key, const char *v);
     void setValue(const char *key, int v);
     void setValue(const char *key, double v);
@@ -43,14 +44,13 @@ class DataElement {
     char *getString(const char *key);
     int getInt(const char *key);
     float getFloat(const char *key);
-    void freeData(void);
     
   private:
     aJsonObject *params;
     aJsonObject *paJsonObj;
 };
 
-typedef void (*GeneralFunction) (DataElement elem);
+typedef void (*GeneralFunction) (DataElement *pelem);
 
 class MilkcocoaSubscriber {
 	public:
@@ -68,8 +68,8 @@ class Milkcocoa {
   static Milkcocoa* createWithApiKey(Client *client, const char *host, uint16_t port, const char *app_id, const char *client_id, const char *key, const char *secret);
   void connect();
   void loop();
-  bool push(const char *path, DataElement dataelement);
-  bool send(const char *path, DataElement dataelement);
+  bool push(const char *path, DataElement *pdataelement);
+  bool send(const char *path, DataElement *pdataelement);
   bool on(const char *path, const char *event, GeneralFunction cb);
 
 
@@ -78,7 +78,6 @@ private:
   char session[128];
   Adafruit_MQTT_Client *mqtt;
   MilkcocoaSubscriber *milkcocoaSubscribers[MILKCOCOA_SUBSCRIBERS];
-  DataElement de;  
 };
 
 

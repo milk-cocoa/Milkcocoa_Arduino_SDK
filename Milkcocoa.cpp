@@ -26,22 +26,21 @@ SOFTWARE.
 #include "stdio.h"
 
 
-
-void DataElement::newData() {
+DataElement::DataElement() {
   params = aJson.createObject();
+  paJsonObj = aJson.createObject();
+  aJson.addItemToObject(paJsonObj, "params", params);
 }
 
-void DataElement::newData(char *json_string) {
-  aJsonObject* obj = aJson.parse(json_string);
-  paJsonObj = obj;  
-  params = aJson.getObjectItem(obj, "params");
+DataElement::DataElement(char *json_string) {
+  paJsonObj = aJson.parse(json_string);
+  params = aJson.getObjectItem(paJsonObj, "params");    
 }
 
-void DataElement::freeData() {
-  if (paJsonObj != NULL) {
-    aJson.deleteItem(paJsonObj);
-    paJsonObj = NULL;
-  }
+DataElement::~DataElement() {
+  aJson.deleteItem(paJsonObj);
+  paJsonObj = NULL;
+  params = NULL;    
 }
 
 void DataElement::setValue(const char *key, const char *v) {
@@ -75,9 +74,7 @@ float DataElement::getFloat(const char *key) {
 
 
 char *DataElement::toCharArray() {
-  aJsonObject *data = aJson.createObject();
-  aJson.addItemToObject(data, "params", params);
-  return aJson.print(data);
+  return aJson.print(paJsonObj);
 }
 
 Milkcocoa::Milkcocoa(Client *client, const char *host, uint16_t port, const char *_app_id, const char *client_id) {
@@ -127,18 +124,28 @@ void Milkcocoa::connect() {
   Serial.println("MQTT Connected!");
 }
 
-bool Milkcocoa::push(const char *path, DataElement dataelement) {
+bool Milkcocoa::push(const char *path, DataElement *pdataelement) {
   char topic[100];
+  bool ret;
+  char *send_array;
   sprintf(topic, "%s/%s/push", app_id, path);
   Adafruit_MQTT_Publish pushPublisher = Adafruit_MQTT_Publish(mqtt, topic);
-  return pushPublisher.publish(dataelement.toCharArray());
+  send_array = pdataelement->toCharArray();
+  ret = pushPublisher.publish(send_array);
+  free(send_array);
+  return ret;
 }
 
-bool Milkcocoa::send(const char *path, DataElement dataelement) {
+bool Milkcocoa::send(const char *path, DataElement *pdataelement) {
   char topic[100];
+  bool ret;
+  char *send_array;    
   sprintf(topic, "%s/%s/send", app_id, path);
   Adafruit_MQTT_Publish pushPublisher = Adafruit_MQTT_Publish(mqtt, topic);
-  return pushPublisher.publish(dataelement.toCharArray());
+  send_array = pdataelement->toCharArray();
+  ret = pushPublisher.publish(send_array);
+  free(send_array);    
+  return ret;
 }
 
 void Milkcocoa::loop() {
@@ -148,9 +155,8 @@ void Milkcocoa::loop() {
     for (uint8_t i=0; i<MILKCOCOA_SUBSCRIBERS; i++) {
       if(milkcocoaSubscribers[i] == 0) continue;
       if (subscription == (milkcocoaSubscribers[i]->mqtt_sub) ) {
-          de.newData((char *)milkcocoaSubscribers[i]->mqtt_sub->lastread);
-          milkcocoaSubscribers[i]->cb( de );
-          de.freeData();
+          DataElement de = DataElement((char *)milkcocoaSubscribers[i]->mqtt_sub->lastread);
+          milkcocoaSubscribers[i]->cb( &de );
       }
     }
   }

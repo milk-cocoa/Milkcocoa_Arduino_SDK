@@ -1,5 +1,7 @@
-#include <ESP8266WiFi.h>
-#include <Milkcocoa.h>
+#include "ESP8266.h"
+#include "Milkcocoa.h"
+#include "Client_ESP8266.h"
+
 extern "C" {
 #include "user_interface.h"
 }
@@ -21,13 +23,13 @@ extern "C" {
 
 /************ Global State (you don't need to change this!) ******************/
 
-// Create an ESP8266 WiFiClient class to connect to the MQTT server.
-WiFiClient client;
+// Create an ESP8266Client class to connect to the MQTT server.
+ESP8266Client wifi;
 
 const char MQTT_SERVER[] PROGMEM    = MILKCOCOA_APP_ID ".mlkcca.com";
 const char MQTT_CLIENTID[] PROGMEM  = __TIME__ MILKCOCOA_APP_ID;
 
-Milkcocoa milkcocoa = Milkcocoa(&client, MQTT_SERVER, MILKCOCOA_SERVERPORT, MILKCOCOA_APP_ID, MQTT_CLIENTID);
+Milkcocoa milkcocoa = Milkcocoa(&wifi, MQTT_SERVER, MILKCOCOA_SERVERPORT, MILKCOCOA_APP_ID, MQTT_CLIENTID);
 
 void setup() {
   Serial.begin(115200);
@@ -35,38 +37,55 @@ void setup() {
 
   Serial.println(F("Milkcocoa SDK demo"));
 
-  // Connect to WiFi access point.
-  Serial.println(); Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(WLAN_SSID);
-
-  WiFi.begin(WLAN_SSID, WLAN_PASS);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  wifi.begin(Serial5, 115200);
+    
+  Serial.print("FW Version:");
+  Serial.println(wifi.getVersion().c_str());
+    
+  if (wifi.setOprToStation()) {
+      Serial.print("to station ok\r\n");
+  } else {
+      Serial.print("to station err\r\n");
   }
-  Serial.println();
+    
+  if (wifi.joinAP(WLAN_SSID, WLAN_PASS)) {
+      Serial.print("Join AP success\r\n");
+      Serial.print("IP: ");
+      Serial.println(wifi.getLocalIP().c_str());    
+  } else {
+      Serial.print("Join AP failure\r\n");
+  }
+        
+  if (wifi.disableMUX()) {
+      Serial.print("single ok\r\n");
+  } else {
+      Serial.print("single err\r\n");
+  }
 
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  Serial.println( milkcocoa.on(MILKCOCOA_DATASTORE, "push", onpush) );
+  if(milkcocoa->on(MILKCOCOA_DATASTORE, "push", onpush)){
+      Serial.println("milkcocoa on sucesss");   
+  }
+  else {
+      Serial.println("milkcocoa on failure");   
+  }
 };
+
+
 
 void loop() {
   milkcocoa.loop();
-  DataElement elem = DataElement();
 
   uint ADC_Value = 0;
   ADC_Value = system_adc_read();
 
+  DataElement elem = DataElement();
   elem.setValue("v", (int)ADC_Value);
-  milkcocoa.push(MILKCOCOA_DATASTORE, elem);
+  milkcocoa.push(MILKCOCOA_DATASTORE, &elem);
+
   delay(7000);
 };
 
-void onpush(DataElement elem) {
+void onpush(DataElement *pelem) {
   Serial.println("onpush");
-  Serial.println(elem.getInt("v"));
+  Serial.println(pelem->jgetInt("v"));
 };
