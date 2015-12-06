@@ -60,9 +60,9 @@ void loop() {
 	delay(10000);
 }
 
-void onpush(DataElement elem) {
-  Serial.println(elem.getString("name"));
-  Serial.println(elem.getInt("age"));
+void onpush(DataElement *pelem) {
+  Serial.println(pelem->getString("name"));
+  Serial.println(pelem->getInt("age"));
   // Output:
   // Milk
   // 35
