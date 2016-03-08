@@ -77,6 +77,18 @@ If you use Milkcocoa API Key Authantication, please use `createWithApiKey`.
 Milkcocoa *milkcocoa = Milkcocoa::createWithApiKey(&client, "milkcocoa_app_id.mlkcca.com", 1883, "milkcocoa_app_id", "mqtt_client_id", "API_KEY", "API_SECRET");
 ```
 
+## Patch for Arduino library 1.7.8
+
+Arduino library version 1.7.8 has memory leak bug at USB driver. To fix this bug, apply following path.
+
+
+```
+./hardware/arduino/samd/cores/arduino/USB/samd21_device.c : Line 152
+
+for (i = 0; i < sizeof(usb_endpoint_table)/4; i++) {
+    (*(uint32_t *)((uint32_t *)(&usb_endpoint_table[0])+i)) = 0;
+}
+```
 
 ## Examples
 
@@ -92,6 +104,7 @@ MIT
 
 
 Copyright (c) 2015 Technical Rockstars.
+
 Copyright (C) 2015 Embedded and Real-Time Systems Laboratory
               Graduate School of Information Science, Nagoya Univ., JAPAN
 
