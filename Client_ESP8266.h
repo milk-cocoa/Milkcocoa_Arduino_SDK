@@ -75,7 +75,7 @@ class ESP8266Client: public Client, public ESP8266 {
         if (dataAvailable()) {
             bufferlen = recv(buffer, ESP8266CLIENT_BUFFER_LEN);
             pbuffer = buffer;
-            //In case of that data is aviable but it is not valid data(not +IPD,...),
+            //In case of that data is available but it is not valid data(not +IPD,...),
             //connection is closed by server.(send "CLOSED")
             if(bufferlen == 0){
                 _connected = 0;
