@@ -68,7 +68,24 @@ class ESP8266Client: public Client, public ESP8266 {
             return 0;
         }
     };
-    int available(){return (bufferlen > 0 || dataAvailable());};
+    int available(){
+        if (bufferlen > 0) {
+            return 1;
+        }
+        if (dataAvailable()) {
+            bufferlen = recv(buffer, ESP8266CLIENT_BUFFER_LEN);
+            pbuffer = buffer;
+            //In case of that data is aviable but it is not valid data(not +IPD,...),
+            //connection is closed by server.(send "CLOSED")
+            if(bufferlen == 0){
+                _connected = 0;
+                releaseTCP();
+                return 0;
+            }
+            return 1;
+        }
+        return 0;
+    };
     int read(){
         if (bufferlen == 0) {
             bufferlen = recv(buffer, ESP8266CLIENT_BUFFER_LEN);
